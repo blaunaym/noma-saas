@@ -75,14 +75,25 @@ function syncCatalogOnBoot(db: DB): void {
   const now = new Date().toISOString()
   let changed = false
 
-  const OLD_TEAS = ['Thé Menthe Poivrée', 'Thé Vert Fruité', 'Thé Noir Thaï', 'Thé mangue', 'Thé menthe', 'Thé Fruits rouges', 'Rooibos vanille']
-  const beforeDrinks = db.drinks_catalog.length
-  db.drinks_catalog = db.drinks_catalog.filter(d => !OLD_TEAS.includes(d.name))
-  if (db.drinks_catalog.length !== beforeDrinks) changed = true
-  if (!db.drinks_catalog.some(d => d.name === 'Thé')) {
-    db.drinks_catalog.push({ id: newId(), name: 'Thé', category: 'hot', price: null, is_active: true, sort_order: 6, created_at: now, description: null })
-    changed = true
+  // Carte boissons canonique — remplace tout ce qui traîne (variantes de thé,
+  // sodas Maya, Coca-Cola, Perrier, Fuze Tea...) par exactement cette liste.
+  const CANONICAL_DRINKS: Record<string, 'hot' | 'cold'> = {
+    'Espresso': 'hot', 'Cappuccino': 'hot', 'Flat White': 'hot', 'Latte': 'hot', 'Mocaccino': 'hot',
+    'Matcha Latte': 'hot', 'Chocolat Chaud': 'hot', 'Chai Latte': 'hot', 'Americano': 'hot', 'Allongé': 'hot',
+    'Macchiato': 'hot', "Verre d'eau": 'cold', 'Dirty Chaï': 'hot', 'Double Espresso': 'hot',
+    'Espresso Tonic': 'cold', 'Diabolo': 'cold', 'Thé': 'hot',
   }
+  const beforeDrinks = db.drinks_catalog.map(d => d.name).sort().join('|')
+  db.drinks_catalog = db.drinks_catalog.filter(d => Object.prototype.hasOwnProperty.call(CANONICAL_DRINKS, d.name))
+  const existingDrinkNames = new Set(db.drinks_catalog.map(d => d.name))
+  let maxSort = db.drinks_catalog.reduce((m, d) => Math.max(m, d.sort_order || 0), 0)
+  for (const [name, category] of Object.entries(CANONICAL_DRINKS)) {
+    if (!existingDrinkNames.has(name)) {
+      maxSort += 1
+      db.drinks_catalog.push({ id: newId(), name, category, price: null, is_active: true, sort_order: maxSort, created_at: now, description: null })
+    }
+  }
+  if (db.drinks_catalog.map(d => d.name).sort().join('|') !== beforeDrinks) changed = true
 
   const OLD_EXTRAS = ['Coca-Cola', 'Fuze Tea']
   const beforeExtras = db.extras_catalog.length
