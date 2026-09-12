@@ -170,25 +170,26 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
             />
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
-            {filteredDrinks.map(drink => (
-              <button
-                key={drink.id}
-                onClick={() => handlePickDrink(drink)}
-                disabled={isPending}
-                className="w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-white text-left transition-colors"
-              >
-                <Coffee size={14} className="text-noma-400 shrink-0" />
-                <span className="text-sm font-medium text-slate-700">{drink.name}</span>
-                {drink.description && (
-                  <span className="text-[11px] text-slate-400 ml-auto pl-2 truncate">{drink.description}</span>
-                )}
-              </button>
-            ))}
-            {filteredDrinks.length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-4">Aucune boisson trouvée</p>
-            )}
-          </div>
+          {filteredDrinks.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-4">Aucune boisson trouvée</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {filteredDrinks.map(drink => (
+                <button
+                  key={drink.id}
+                  onClick={() => handlePickDrink(drink)}
+                  disabled={isPending}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-50 hover:bg-noma-50 hover:border-noma-200 border border-transparent text-sm font-medium text-slate-700 text-left active:scale-[0.97] transition-all duration-150"
+                >
+                  <Coffee size={14} className="text-noma-400 shrink-0" />
+                  <span>{drink.name}</span>
+                  {drink.description && (
+                    <span className="text-[11px] text-slate-400 ml-auto pl-2 truncate">{drink.description}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="pt-2 border-t border-slate-100">
             <Button variant="secondary" onClick={handleClose} className="w-full">Fermer</Button>
