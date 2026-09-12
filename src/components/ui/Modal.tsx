@@ -40,12 +40,12 @@ export default function Modal({ open, onClose, title, children, size = 'md', cla
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
       <div className={cn(
-        'relative bg-white rounded-2xl shadow-2xl w-full animate-slide-in',
+        'relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col animate-slide-in',
         sizes[size],
         className
       )}>
         {title && (
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
             <h2 className="text-lg font-bold text-slate-900">{title}</h2>
             <button
               onClick={onClose}
@@ -55,7 +55,7 @@ export default function Modal({ open, onClose, title, children, size = 'md', cla
             </button>
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto">{children}</div>
       </div>
     </div>
   )

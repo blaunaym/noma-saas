@@ -83410,36 +83410,6 @@
       "description": null
     },
     {
-      "id": "a579f3a4-2e8e-4d23-bf8b-8c141e4a9ff1",
-      "name": "Thé Menthe Poivrée",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 6,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "ed6fad7c-233a-4d77-a45a-02bbb0c33bf4",
-      "name": "Thé Vert Fruité",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 7,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "16fae2a2-11ff-4922-9f88-321f5886e186",
-      "name": "Thé Noir Thaï",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 8,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
       "id": "adcba24f-0b2f-4bfa-b6b5-9959901b1264",
       "name": "Matcha Latte",
       "category": "hot",
@@ -83470,96 +83440,6 @@
       "description": null
     },
     {
-      "id": "96ec1e5a-d569-4750-aa3b-b9fae0baceb3",
-      "name": "Boisson Maya Passion-Ananas-Mangue",
-      "category": "cold",
-      "price": null,
-      "is_active": true,
-      "sort_order": 20,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "6acf79e6-2e4d-489a-80a4-88268ea40afa",
-      "name": "Boisson Maya Litchi",
-      "category": "cold",
-      "price": null,
-      "is_active": true,
-      "sort_order": 21,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "1a33bc14-1cea-44ea-b454-7900d2b20df4",
-      "name": "Coca Cola Zero",
-      "category": "cold",
-      "price": null,
-      "is_active": true,
-      "sort_order": 22,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "6e2edfbb-f32b-489e-982a-98a06672cc53",
-      "name": "Perrier",
-      "category": "cold",
-      "price": null,
-      "is_active": true,
-      "sort_order": 23,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "aaee41f6-e121-4061-8e4c-59889aa21759",
-      "name": "Fuze Tea Pêche",
-      "category": "cold",
-      "price": null,
-      "is_active": true,
-      "sort_order": 24,
-      "created_at": "2026-03-20T15:49:44.692503+00:00",
-      "description": null
-    },
-    {
-      "id": "f85e91db-2005-43b3-bba9-c44cecc2f867",
-      "name": "Thé mangue",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 20,
-      "created_at": "2026-05-04T08:24:21.855574+00:00",
-      "description": "Thé fruité à la mangue"
-    },
-    {
-      "id": "580dd94b-1770-4fc5-9074-3a5cd3b6df3f",
-      "name": "Thé menthe",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 21,
-      "created_at": "2026-05-04T08:24:21.855574+00:00",
-      "description": "Thé à la menthe fraîche"
-    },
-    {
-      "id": "5309f21a-fdf5-44d8-a51e-97e3e9110405",
-      "name": "Thé Fruits rouges",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 22,
-      "created_at": "2026-05-04T08:24:21.855574+00:00",
-      "description": "Thé aux fruits rouges"
-    },
-    {
-      "id": "7676bb07-6c03-4178-92c6-a208bf3910d9",
-      "name": "Rooibos vanille",
-      "category": "hot",
-      "price": null,
-      "is_active": true,
-      "sort_order": 23,
-      "created_at": "2026-05-04T08:24:21.855574+00:00",
-      "description": "Rooibos doux à la vanille"
-    },
-    {
       "id": "0c8b7832-597b-4a0b-96e0-496041b0baba",
       "name": "Americano",
       "category": "hot",
@@ -83588,6 +83468,66 @@
       "sort_order": 9,
       "created_at": "2026-05-05T09:00:57.151404+00:00",
       "description": null
+    },
+    {
+      "id": "780b8fd1-e80d-4607-943c-1784b171dd1b",
+      "name": "Verre d'eau",
+      "category": "cold",
+      "price": null,
+      "is_active": true,
+      "sort_order": 30,
+      "created_at": "2026-09-02T00:00:00.000000+00:00",
+      "description": null
+    },
+    {
+      "id": "a30fcdfa-7bfb-4ed3-97fc-cb2a0bf0154c",
+      "name": "Dirty Chaï",
+      "category": "hot",
+      "price": null,
+      "is_active": true,
+      "sort_order": 30,
+      "created_at": "2026-09-02T00:00:00.000000+00:00",
+      "description": null
+    },
+    {
+      "id": "7f88165f-d3c4-4a3f-8615-798c17bdcc9d",
+      "name": "Double Espresso",
+      "category": "hot",
+      "price": null,
+      "is_active": true,
+      "sort_order": 31,
+      "created_at": "2026-09-02T00:00:00.000000+00:00",
+      "description": null
+    },
+    {
+      "id": "275414e8-bf83-4314-82c1-d1ad8985da37",
+      "name": "Espresso Tonic",
+      "category": "cold",
+      "price": null,
+      "is_active": true,
+      "sort_order": 31,
+      "created_at": "2026-09-02T00:00:00.000000+00:00",
+      "description": null
+    },
+    {
+      "id": "2f34fbcc-50c0-40c0-bd85-0727a0101024",
+      "name": "Diabolo",
+      "category": "cold",
+      "price": null,
+      "is_active": true,
+      "sort_order": 32,
+      "created_at": "2026-09-02T00:00:00.000000+00:00",
+      "description": null
+    },
+    {
+      "id": "c63d3fd4-b4bd-4165-a399-850f6f85675e",
+      "name": "Thé",
+      "category": "hot",
+      "price": null,
+      "is_active": true,
+      "sort_order": 6,
+      "created_at": "2026-09-12T12:52:20.380081+00:00",
+      "description": null
     }
   ],
   "extras_catalog": [
@@ -83606,24 +83546,6 @@
       "price": null,
       "is_active": true,
       "sort_order": 11,
-      "created_at": "2026-05-04T08:24:21.855574+00:00",
-      "category": "boisson"
-    },
-    {
-      "id": "6b20233f-b453-458f-ac2c-60c30d835a0f",
-      "name": "Coca-Cola",
-      "price": null,
-      "is_active": true,
-      "sort_order": 12,
-      "created_at": "2026-05-04T08:24:21.855574+00:00",
-      "category": "boisson"
-    },
-    {
-      "id": "0447c184-df54-4424-a0b7-d4a09b81d527",
-      "name": "Fuze Tea",
-      "price": null,
-      "is_active": true,
-      "sort_order": 13,
       "created_at": "2026-05-04T08:24:21.855574+00:00",
       "category": "boisson"
     },
@@ -83698,6 +83620,24 @@
       "sort_order": 6,
       "created_at": "2026-03-20T15:49:44.692503+00:00",
       "category": "sucre"
+    },
+    {
+      "id": "7c31875b-7c6f-4a9d-a28e-c3970231c9eb",
+      "name": "Canette",
+      "category": "boisson",
+      "price": null,
+      "is_active": true,
+      "sort_order": 12,
+      "created_at": "2026-09-12T12:52:20.380081+00:00"
+    },
+    {
+      "id": "e93e90e0-f6a8-423b-b1ea-5c786a43900d",
+      "name": "Muffins",
+      "category": "sucre",
+      "price": null,
+      "is_active": true,
+      "sort_order": 7,
+      "created_at": "2026-09-12T12:52:20.380081+00:00"
     }
   ],
   "drink_addons": [
@@ -83735,6 +83675,20 @@
       "price": 0.5,
       "is_active": true,
       "created_at": "2026-03-20T15:49:44.692503+00:00"
+    },
+    {
+      "id": "9b2d97c6-4138-4f5d-bdd1-98484f426cc3",
+      "name": "Sirop Pistache",
+      "price": 0.5,
+      "is_active": true,
+      "created_at": "2026-09-12T13:28:57.183120+00:00"
+    },
+    {
+      "id": "10d0c405-4b3e-4762-a9de-e0244814b8e6",
+      "name": "Purée de Mangue",
+      "price": 0.5,
+      "is_active": true,
+      "created_at": "2026-09-12T13:28:57.183120+00:00"
     }
   ]
 }

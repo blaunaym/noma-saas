@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import { DrinkCatalog, DrinkAddon, SessionWithDetails } from '@/types'
-import { Coffee, ChevronLeft, Check, RefreshCw } from 'lucide-react'
+import { Coffee, ChevronLeft, Check, RefreshCw, Search } from 'lucide-react'
 
 interface AddDrinkModalProps {
   open: boolean
@@ -16,37 +16,69 @@ interface AddDrinkModalProps {
   replaceDrinkId?: string
 }
 
-const CATEGORY_ORDER  = ['hot', 'cold', 'other']
-const CATEGORY_LABELS: Record<string, string> = { hot: '☕ Chaud', cold: '🧊 Froid', other: '✨ Autre' }
+function normalize(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+const DIABOLO_FLAVORS = ['P\u00eache', 'Menthe', 'Grenadine', 'Citron', 'Violette', 'Jus de citron']
+
+function isDiabolo(name: string): boolean {
+  return normalize(name) === 'diabolo'
+}
+
+const TEA_FLAVORS = ['Mangue', 'Fruit rouge', 'Menthe', 'Rooibos']
+
+function isTea(name: string): boolean {
+  return normalize(name) === 'the'
+}
+
+const DIRECT_ADD_DRINKS = ["verre d'eau"]
+
+function isDirectAdd(name: string): boolean {
+  return DIRECT_ADD_DRINKS.includes(normalize(name))
+}
 
 export default function AddDrinkModal({ open, onClose, onSuccess, session, drinks, addons, replaceDrinkId }: AddDrinkModalProps) {
-  const [step,           setStep]         = useState<'drink' | 'addons'>('drink')
+  const [step,           setStep]         = useState<'drink' | 'addons' | 'flavor'>('drink')
   const [selectedDrink,  setSelectedDrink]= useState<DrinkCatalog | null>(null)
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [temperature,    setTemperature]  = useState<'hot' | 'ice'>('hot')
   const [isPending,      setIsPending]    = useState(false)
+  const [query,          setQuery]        = useState('')
 
   const isReplaceMode = !!replaceDrinkId
 
   function handleClose() {
     setStep('drink'); setSelectedDrink(null); setSelectedAddons([]); setTemperature('hot')
+    setQuery('')
     onClose()
   }
 
   function handlePickDrink(drink: DrinkCatalog) {
+    setQuery('')
+    if (isDirectAdd(drink.name)) {
+      submitDrink(drink, [], drink.name)
+      return
+    }
     setSelectedDrink(drink)
     setTemperature('hot')
-    setStep('addons')
+    setStep(isDiabolo(drink.name) || isTea(drink.name) ? 'flavor' : 'addons')
+  }
+
+  function handlePickFlavor(flavor: string) {
+    if (!selectedDrink) return
+    const suffix = isTea(selectedDrink.name) && temperature === 'ice' ? ' Glacé' : ''
+    submitDrink(selectedDrink, [], `${selectedDrink.name} (${flavor})${suffix}`)
   }
 
   function toggleAddon(id: string) {
     setSelectedAddons(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id])
   }
 
-  async function submitDrink(drink: DrinkCatalog, addonIds: string[]) {
+  async function submitDrink(drink: DrinkCatalog, addonIds: string[], nameOverride?: string) {
     if (!session) return
     setIsPending(true)
-    const drinkName = temperature === 'ice' ? `${drink.name} (Glacé)` : drink.name
+    const drinkName = nameOverride ?? (temperature === 'ice' ? `${drink.name} (Glacé)` : drink.name)
     try {
       const body = isReplaceMode
         ? {
@@ -87,10 +119,19 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
   }
 
   const activeAddons = addons.filter(a => a.is_active)
-  const grouped = CATEGORY_ORDER.reduce<Record<string, DrinkCatalog[]>>((acc, cat) => {
-    acc[cat] = drinks.filter(d => d.category === cat && d.is_active).sort((a, b) => a.sort_order - b.sort_order)
-    return acc
-  }, {})
+
+  const activeDrinks = useMemo(
+    () => drinks
+      .filter(d => d.is_active)
+      .sort((a, b) => a.name.localeCompare(b.name, 'fr')),
+    [drinks]
+  )
+
+  const filteredDrinks = useMemo(() => {
+    const q = normalize(query.trim())
+    if (!q) return activeDrinks
+    return activeDrinks.filter(d => normalize(d.name).includes(q))
+  }, [activeDrinks, query])
 
   const addonTotal = activeAddons
     .filter(a => selectedAddons.includes(a.id))
@@ -100,10 +141,12 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
     ? `Remplacer la boisson — ${session?.first_name ?? ''}`
     : step === 'drink'
       ? `Boisson — ${session?.first_name ?? ''}`
-      : `Suppléments — ${selectedDrink?.name ?? ''}`
+      : step === 'flavor'
+        ? `Parfum — ${selectedDrink?.name ?? ''}`
+        : `Suppléments — ${selectedDrink?.name ?? ''}`
 
   return (
-    <Modal open={open} onClose={handleClose} title={modalTitle} size="lg">
+    <Modal open={open} onClose={handleClose} title={modalTitle} size="xl">
       {step === 'drink' && (
         <div className="space-y-6">
           {isReplaceMode && (
@@ -112,37 +155,110 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
               Choisissez la boisson de remplacement
             </div>
           )}
-          {CATEGORY_ORDER.map(cat => {
-            const items = grouped[cat]
-            if (!items?.length) return null
-            return (
-              <div key={cat}>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                  {CATEGORY_LABELS[cat]}
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {items.map(drink => (
-                    <button
-                      key={drink.id}
-                      onClick={() => handlePickDrink(drink)}
-                      disabled={isPending}
-                      className="flex flex-col items-start gap-1 px-4 py-3 rounded-xl bg-slate-50 hover:bg-noma-50 hover:border-noma-200 border border-transparent text-left active:scale-[0.97] transition-all duration-150"
-                    >
-                      <div className="flex items-center gap-2 w-full">
-                        <Coffee size={14} className="text-noma-400 shrink-0" />
-                        <span className="text-sm font-semibold text-slate-700">{drink.name}</span>
-                      </div>
-                      {drink.description && (
-                        <span className="text-[11px] text-slate-400 leading-tight pl-5">{drink.description}</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
+
+          <div className="relative">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              inputMode="search"
+              enterKeyHint="search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Rechercher une boisson..."
+              autoFocus
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-base focus:outline-none focus:ring-2 focus:ring-noma-400 focus:border-transparent transition-all duration-150"
+            />
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+            {filteredDrinks.map(drink => (
+              <button
+                key={drink.id}
+                onClick={() => handlePickDrink(drink)}
+                disabled={isPending}
+                className="w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-white text-left transition-colors"
+              >
+                <Coffee size={14} className="text-noma-400 shrink-0" />
+                <span className="text-sm font-medium text-slate-700">{drink.name}</span>
+                {drink.description && (
+                  <span className="text-[11px] text-slate-400 ml-auto pl-2 truncate">{drink.description}</span>
+                )}
+              </button>
+            ))}
+            {filteredDrinks.length === 0 && (
+              <p className="text-sm text-slate-400 text-center py-4">Aucune boisson trouvée</p>
+            )}
+          </div>
+
           <div className="pt-2 border-t border-slate-100">
             <Button variant="secondary" onClick={handleClose} className="w-full">Fermer</Button>
+          </div>
+        </div>
+      )}
+
+      {step === 'flavor' && selectedDrink && (
+        <div className="space-y-5">
+          <button
+            onClick={() => { setStep('drink'); setSelectedDrink(null) }}
+            className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+          >
+            <ChevronLeft size={16} /> Changer de boisson
+          </button>
+
+          <div className="bg-noma-50 rounded-xl px-4 py-3 flex items-center gap-3">
+            <Coffee size={18} className="text-noma-500" />
+            <span className="font-semibold text-noma-800">{selectedDrink.name}</span>
+          </div>
+
+          {isTea(selectedDrink.name) && (
+            <div>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Température</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTemperature('hot')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
+                    temperature === 'hot'
+                      ? 'border-orange-400 bg-orange-50 text-orange-800'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                  }`}
+                >
+                  ☕ Chaud
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemperature('ice')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
+                    temperature === 'ice'
+                      ? 'border-blue-400 bg-blue-50 text-blue-800'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                  }`}
+                >
+                  🧊 Glacé
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <p className="text-sm font-semibold text-slate-700 mb-3">Choisissez un parfum</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(isTea(selectedDrink.name) ? TEA_FLAVORS : DIABOLO_FLAVORS).map(flavor => (
+                <button
+                  key={flavor}
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handlePickFlavor(flavor)}
+                  className="px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm font-medium text-slate-700 text-left hover:border-noma-400 hover:bg-noma-50 active:scale-[0.97] transition-all"
+                >
+                  {flavor}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100">
+            <Button variant="secondary" onClick={handleClose} className="w-full">Annuler</Button>
           </div>
         </div>
       )}
@@ -150,7 +266,7 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
       {step === 'addons' && selectedDrink && (
         <div className="space-y-5">
           <button
-            onClick={() => { setStep('drink'); setSelectedAddons([]) }}
+            onClick={() => { setStep('drink'); setSelectedAddons([]); setTemperature('hot') }}
             className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
           >
             <ChevronLeft size={16} /> Changer de boisson

@@ -43,7 +43,7 @@ function readDb(): DB {
   const raw = fs.readFileSync(DB_PATH, 'utf-8')
   const data = JSON.parse(raw)
   // Compatibilité ascendante si les nouvelles tables n'existent pas encore
-  return {
+  const db: DB = {
     sessions:             data.sessions ?? [],
     session_drinks:       data.session_drinks ?? [],
     session_drink_addons: data.session_drink_addons ?? [],
@@ -52,6 +52,8 @@ function readDb(): DB {
     extras_catalog:       data.extras_catalog ?? [],
     drink_addons:         data.drink_addons ?? [],
   }
+  syncCatalogOnBoot(db)
+  return db
 }
 
 function writeDb(db: DB): void {
@@ -60,6 +62,49 @@ function writeDb(db: DB): void {
 
 function newId(): string {
   return crypto.randomUUID()
+}
+
+// Met à jour le catalogue (boissons/extras/suppléments) sur un volume déjà
+// initialisé, sans jamais toucher aux sessions ni à l'historique existant.
+// Idempotent — ne réécrit le fichier que si le catalogue a réellement changé.
+let catalogSynced = false
+
+function syncCatalogOnBoot(db: DB): void {
+  if (catalogSynced) return
+  catalogSynced = true
+  const now = new Date().toISOString()
+  let changed = false
+
+  const OLD_TEAS = ['Thé Menthe Poivrée', 'Thé Vert Fruité', 'Thé Noir Thaï', 'Thé mangue', 'Thé menthe', 'Thé Fruits rouges', 'Rooibos vanille']
+  const beforeDrinks = db.drinks_catalog.length
+  db.drinks_catalog = db.drinks_catalog.filter(d => !OLD_TEAS.includes(d.name))
+  if (db.drinks_catalog.length !== beforeDrinks) changed = true
+  if (!db.drinks_catalog.some(d => d.name === 'Thé')) {
+    db.drinks_catalog.push({ id: newId(), name: 'Thé', category: 'hot', price: null, is_active: true, sort_order: 6, created_at: now, description: null })
+    changed = true
+  }
+
+  const OLD_EXTRAS = ['Coca-Cola', 'Fuze Tea']
+  const beforeExtras = db.extras_catalog.length
+  db.extras_catalog = db.extras_catalog.filter(e => !OLD_EXTRAS.includes(e.name))
+  if (db.extras_catalog.length !== beforeExtras) changed = true
+  if (!db.extras_catalog.some(e => e.name === 'Canette')) {
+    db.extras_catalog.push({ id: newId(), name: 'Canette', category: 'boisson', price: null, is_active: true, sort_order: 12, created_at: now })
+    changed = true
+  }
+  if (!db.extras_catalog.some(e => e.name === 'Muffins')) {
+    db.extras_catalog.push({ id: newId(), name: 'Muffins', category: 'sucre', price: null, is_active: true, sort_order: 7, created_at: now })
+    changed = true
+  }
+
+  for (const [name, price] of [['Sirop Pistache', 0.5], ['Purée de Mangue', 0.5]] as const) {
+    if (!db.drink_addons.some(a => a.name === name)) {
+      db.drink_addons.push({ id: newId(), name, price, is_active: true, created_at: now })
+      changed = true
+    }
+  }
+
+  if (changed) writeDb(db)
 }
 
 // ─── Sessions ────────────────────────────────────────────────────────────────
@@ -349,9 +394,25 @@ export function db_addExtra(input: {
     extra_id:   input.extra_id,
     extra_name: input.extra_name,
     quantity:   input.quantity,
+    bar_status: 'preparing',
     added_at:   new Date().toISOString(),
+    served_at:  null,
   }
   db.session_extras.push(extra)
+  writeDb(db)
+  return {}
+}
+
+export function db_serveExtra(extraId: string): { error?: string } {
+  const db = readDb()
+  const idx = db.session_extras.findIndex(e => e.id === extraId)
+  if (idx === -1) return { error: 'Extra introuvable' }
+
+  db.session_extras[idx] = {
+    ...db.session_extras[idx],
+    bar_status: 'served',
+    served_at:  new Date().toISOString(),
+  }
   writeDb(db)
   return {}
 }
@@ -381,7 +442,9 @@ export function db_replaceExtra(input: {
     extra_id:   input.extra_id,
     extra_name: input.extra_name,
     quantity:   input.quantity,
+    bar_status: 'preparing',
     added_at:   new Date().toISOString(),
+    served_at:  null,
   })
   writeDb(db)
   return {}
