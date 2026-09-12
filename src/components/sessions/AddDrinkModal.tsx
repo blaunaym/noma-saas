@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import { DrinkCatalog, DrinkAddon, SessionWithDetails } from '@/types'
-import { Coffee, ChevronLeft, Check, RefreshCw, Search } from 'lucide-react'
+import { Coffee, ChevronLeft, Check, RefreshCw } from 'lucide-react'
 
 interface AddDrinkModalProps {
   open: boolean
@@ -44,18 +44,15 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [temperature,    setTemperature]  = useState<'hot' | 'ice'>('hot')
   const [isPending,      setIsPending]    = useState(false)
-  const [query,          setQuery]        = useState('')
 
   const isReplaceMode = !!replaceDrinkId
 
   function handleClose() {
     setStep('drink'); setSelectedDrink(null); setSelectedAddons([]); setTemperature('hot')
-    setQuery('')
     onClose()
   }
 
   function handlePickDrink(drink: DrinkCatalog) {
-    setQuery('')
     if (isDirectAdd(drink.name)) {
       submitDrink(drink, [], drink.name)
       return
@@ -127,12 +124,6 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
     [drinks]
   )
 
-  const filteredDrinks = useMemo(() => {
-    const q = normalize(query.trim())
-    if (!q) return activeDrinks
-    return activeDrinks.filter(d => normalize(d.name).includes(q))
-  }, [activeDrinks, query])
-
   const addonTotal = activeAddons
     .filter(a => selectedAddons.includes(a.id))
     .reduce((sum, a) => sum + (a.price ?? 0), 0)
@@ -156,25 +147,11 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
             </div>
           )}
 
-          <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              inputMode="search"
-              enterKeyHint="search"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Rechercher une boisson..."
-              autoFocus
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-base focus:outline-none focus:ring-2 focus:ring-noma-400 focus:border-transparent transition-all duration-150"
-            />
-          </div>
-
-          {filteredDrinks.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">Aucune boisson trouvée</p>
+          {activeDrinks.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-4">Aucune boisson disponible</p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
-              {filteredDrinks.map(drink => (
+              {activeDrinks.map(drink => (
                 <button
                   key={drink.id}
                   onClick={() => handlePickDrink(drink)}
