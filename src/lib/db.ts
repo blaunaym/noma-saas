@@ -22,6 +22,7 @@ export const db_updateSession    = impl.db_updateSession
 export const db_addDrink         = impl.db_addDrink
 export const db_addExtra         = impl.db_addExtra
 export const db_serveDrink       = impl.db_serveDrink
+export const db_serveExtra       = impl.db_serveExtra
 export const db_deleteDrink      = impl.db_deleteDrink
 export const db_replaceDrink     = impl.db_replaceDrink
 export const db_deleteExtra      = impl.db_deleteExtra

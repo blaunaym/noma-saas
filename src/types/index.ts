@@ -67,7 +67,9 @@ export interface SessionExtra {
   extra_id: string
   extra_name: string
   quantity: number
+  bar_status: BarStatus
   added_at: string
+  served_at: string | null
 }
 
 export interface Session {
