@@ -103,12 +103,19 @@ function syncCatalogOnBoot(db: DB): void {
     db.extras_catalog.push({ id: newId(), name: 'Canette', category: 'boisson', price: null, is_active: true, sort_order: 12, created_at: now })
     changed = true
   }
+  if (!db.extras_catalog.some(e => e.name === 'Christaline')) {
+    db.extras_catalog.push({ id: newId(), name: 'Christaline', category: 'boisson', price: null, is_active: true, sort_order: 13, created_at: now })
+    changed = true
+  }
   if (!db.extras_catalog.some(e => e.name === 'Muffins')) {
     db.extras_catalog.push({ id: newId(), name: 'Muffins', category: 'sucre', price: null, is_active: true, sort_order: 7, created_at: now })
     changed = true
   }
 
-  for (const [name, price] of [['Sirop Pistache', 0.5], ['Purée de Mangue', 0.5]] as const) {
+  for (const [name, price] of [
+    ['Sirop Pistache', 0.5], ['Purée de Mangue', 0.5],
+    ['Sirop Rose', null], ['Pink', null], ['Blue', null],
+  ] as const) {
     if (!db.drink_addons.some(a => a.name === name)) {
       db.drink_addons.push({ id: newId(), name, price, is_active: true, created_at: now })
       changed = true

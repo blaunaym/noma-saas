@@ -26,10 +26,22 @@ function isDiabolo(name: string): boolean {
   return normalize(name) === 'diabolo'
 }
 
-const TEA_FLAVORS = ['Mangue', 'Fruit rouge', 'Menthe', 'Rooibos']
+const TEA_FLAVORS = ['Mangue', 'Fruit rouge', 'Menthe', 'Rooibos', 'Hibiscus']
 
 function isTea(name: string): boolean {
   return normalize(name) === 'the'
+}
+
+// Suppléments proposés uniquement pour certaines boissons (les autres sont proposés partout)
+const DRINK_ONLY_ADDONS: Record<string, string[]> = {
+  'sirop rose': ['matcha latte'],
+  'pink':       ['latte'],
+  'blue':       ['latte'],
+}
+
+function isAddonForDrink(addonName: string, drinkName: string): boolean {
+  const drinks = DRINK_ONLY_ADDONS[normalize(addonName)]
+  return !drinks || drinks.includes(normalize(drinkName))
 }
 
 const DIRECT_ADD_DRINKS = ["verre d'eau"]
@@ -115,7 +127,9 @@ export default function AddDrinkModal({ open, onClose, onSuccess, session, drink
     }
   }
 
-  const activeAddons = addons.filter(a => a.is_active)
+  const activeAddons = addons.filter(a =>
+    a.is_active && (!selectedDrink || isAddonForDrink(a.name, selectedDrink.name))
+  )
 
   const activeDrinks = useMemo(
     () => drinks
